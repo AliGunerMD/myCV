@@ -295,12 +295,12 @@ bibliography_entries("ag_bibtex_20230222.bib")
 ```{r, eval=FALSE}
 
 library("bib2df")
-bib_df <- bib2df(here::here("myCV", "ag_bibtex_20230225.bib"))  
+bib_df <- bib2df(here::here("myCV", "data", "ag_bibtex_20230225.bib"))  
         
 my_bib_df <- bib_df %>% 
         arrange(desc(YEAR))
 
-df2bib(my_bib_df, file = here::here("myCV", "sorted_ag_bibtex_20230222.bib"))
+df2bib(my_bib_df, file = here::here("myCV","data", "sorted_ag_bibtex_20230222.bib"))
 
 ```
   
