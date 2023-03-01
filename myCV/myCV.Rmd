@@ -1,0 +1,312 @@
+---
+# name: Ali
+surname: Ali Guner
+position: "Professor of Surgery"
+address: "Karadeniz Technical University, Faculty of Medicine, Trabzon, Turkey"
+# phone: +90 506 ....
+profilepic: "images/ag_2019.jpg"
+www: aliguner.com
+email: "draliguner@yahoo.com"
+twitter: AliGunerMD
+github: AliGunerMD
+orcid: 0000-0001-7801-8081
+publons: "Q-2744-2015"
+googlescholar: "-WX7tXMAAAAJ"
+# linkedin: 
+date: "`r format(Sys.time(), '%B %Y')`"
+# aboutme: 
+headcolor: 414141
+output: 
+  vitae::awesomecv:
+    page_total: true
+editor_options: 
+  chunk_output_type: console
+---
+<!-- "awesome-cv.cls" file has been mildly modified. 
+mainly for "For elements of entry" lines.-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(vitae)
+library(tidyverse)
+library(scholar)
+library(glue)
+```
+
+
+
+```{r functions}
+# an Excel file is needed. All subcategory should be included into the different sheets.
+
+readExcelSheets <- function(filename){
+  all <- readxl::excel_sheets(filename)
+  list <- lapply(all, function(x) readxl::read_excel(filename, sheet = x))
+  names(list) <- all
+  invisible(list2env(list, envir = .GlobalEnv))
+}
+
+filename <- here::here("myCV", "data", "cv_data_2023.xlsx")
+readExcelSheets(filename)
+
+```
+
+# Who I am
+
+ * A surgeon who has lost his mind with the treatment of gastric cancer..  
+ * An academic who enjoys to play with computers..  
+ * A data scientist who believes that the future of science is in data..  
+ * A visionary waiting for the irony of artificial intelligence to turn into reality..  
+ * A photographer in pursuit of the abstract details of the universe..  
+ * Epicurean..  
+ 
+# Education
+
+```{r}
+education %>% 
+  detailed_entries( 
+          with = degree,
+          what = institution,
+          when = year,
+          where = where,
+          why = NULL)
+          
+```
+
+
+<!-- # Language level -->
+
+```{r, eval=FALSE}
+language_exam <- tribble(
+        ~exam, ~language, ~year, ~degree,
+        "YDS", "English", "2016", 83.75,
+        "YÖKDİL", "English", "2017", 96.25
+)
+
+language_exam %>% 
+        brief_entries( 
+                what = glue::glue("{exam} - {language} ({year})", .na = ""),
+                with = glue::glue("{degree}/100", .na = ""),
+                )
+```
+
+ 
+# Associations
+
+```{r}
+association %>% 
+        brief_entries( 
+                with = glue::glue("{year_start} - {year_end}", .na = ""),
+                what = name
+                )
+
+```
+
+
+# Classes
+
+```{r}
+class %>% 
+        select(-isim) %>% 
+        detailed_entries( 
+                # what = level,
+                where = glue("{institute} - {level}") ,
+                with = period,
+                why = name
+                )
+
+```
+
+
+
+
+# Publications
+
+```{r}
+# https://scholar.google.com/citations?view_op=list_works&hl=tr&hl=tr&user=-WX7tXMAAAAJ&pagesize=100&sortby=pubdate
+
+# https://www.webofscience.com/wos/author/record/Q-2744-2015
+
+my_id <- "-WX7tXMAAAAJ"
+my_profile <- get_profile(my_id)
+
+
+imported_pubs <- scholar::format_publications(my_id, author.name =  "A Guner") %>% as_tibble() %>% 
+        mutate(value = str_replace_all(value, "Güner", "Guner"),
+               row_id = row_number(),
+               value = glue::glue("{row_id}. {value}"))
+
+# get_citation_history(my_id)
+```
+
+I have **`r nrow(imported_pubs)`** published articles.  
+Total number of the citations for the `r nrow(imported_pubs)` articles: `r my_profile$total_cites`.  
+h-index (based on the [Google Scholar](https://scholar.google.com/citations?view_op=list_works&hl=tr&hl=tr&user=-WX7tXMAAAAJ&pagesize=100&sortby=pubdate)): `r my_profile$h_index`.   
+i-10 index: `r my_profile$i10_index`.  
+h-index (Web of Science): 19 (manually added).    
+
+
+```{r, results = "asis"}
+
+imported_pubs$value %>% 
+        cat(sep='\n\n')
+
+
+# get_publications(my_id) %>%
+#         as_tibble() %>% 
+#          arrange(desc(year)) %>% View()
+
+
+
+# scholar::get_publications("-WX7tXMAAAAJ") %>%
+#         as_tibble() %>% 
+#         arrange(desc(year)) %>% 
+#         mutate(year = as.character(year),
+#                row_id = row_number(),
+#                journal = str_to_title(journal)) %>% 
+#         detailed_entries(
+#     what = title,
+#     when = pubid,
+#     with = glue::glue("{row_id}. {author}", .na = "") ,
+#     where = journal,
+#     why = glue::glue("{year}. {number}", .na = "")
+#   )
+
+
+```
+
+# Invited talks
+
+```{r}
+invitation %>% 
+        arrange(desc(year)) %>% 
+        detailed_entries( 
+                what = glue::glue("{role}: {congress}", .na = ""),
+                when = glue::glue("{month}/{year}", .na = ""),
+                where = city,
+                # with = role,
+                why = details
+                )
+
+```
+
+
+
+
+# Abstracts
+
+```{r, eval=FALSE}
+abstract %>% 
+        arrange(desc(year)) %>% 
+        detailed_entries( 
+                # what = authors,
+                when = glue::glue("{year}/{city}", .na = ""),
+                with = authors,
+                what = glue::glue("{number} {congress}", .na = ""),
+                why = title
+                )
+
+```
+
+```{r, results = "asis"}
+abstract %>% 
+        arrange(desc(year)) %>% 
+        mutate(row_id = row_number() ,
+               value = glue("{row_id}. {authors} ({number}) {title}. {congress} - {year}/{city}.", .na = "")) %>% 
+        pull(value) %>% 
+        cat(sep='\n\n')
+
+```
+
+
+# Books
+```{r}
+book %>% 
+        mutate(year = parse_number(editor)) %>% 
+        arrange(desc(year)) %>% 
+        detailed_entries( 
+                what = glue::glue("{book} ({editor})", .na = ""),
+                when = type,
+                # where = glue::glue("{author} ({editor})", .na = ""),
+                # with = name,
+                why = glue::glue("{name} (Authors: {author})", .na = ""),
+                )
+
+```
+
+
+# Courses
+```{r}
+course %>% 
+        arrange(desc(year)) %>% 
+        detailed_entries(
+                what = name,
+                # when = year,
+                # with = authors,
+                when = glue::glue("{year}/{city}", .na = ""))
+```
+
+
+# Congress
+```{r}
+congress %>% 
+        separate_rows(position, sep = ",") %>% 
+        arrange(desc(year)) %>% 
+        detailed_entries(
+                what = name,
+                # when = year,
+                # with = authors,
+                when = glue::glue("{year}/{city}", .na = ""),
+                why = position)
+```
+
+
+# Others
+```{r}
+others %>% 
+        arrange(type) %>% 
+        brief_entries(
+                # where = type,
+                # when = year,
+                # with = authors,
+                with = glue::glue("{date_start} - {date_end}", .na = ""),
+                what = glue::glue("{definition} ({affiliation})", .na = ""))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval=FALSE}
+
+# knitr::write_bib(c("vitae", "tibble"), "ag_bibtex_2022_03.bib")
+
+bibliography_entries("ag_bibtex_20230222.bib") 
+```
+
+
+```{r, eval=FALSE}
+
+library("bib2df")
+bib_df <- bib2df(here::here("myCV", "ag_bibtex_20230225.bib"))  
+        
+my_bib_df <- bib_df %>% 
+        arrange(desc(YEAR))
+
+df2bib(my_bib_df, file = here::here("myCV", "sorted_ag_bibtex_20230222.bib"))
+
+```
+  
+
+===============================================================================================
+  
+  
+**Last update:** `r format(Sys.time(), "%d %b %Y %X")`   
+This CV was prepared with *[vitae](https://github.com/mitchelloharawild/vitae)* and *[scholar](https://github.com/jkeirstead/scholar)* (with the help of Microsoft Excel and Google Scholar) in RStudio.
